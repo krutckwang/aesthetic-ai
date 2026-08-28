@@ -1,0 +1,43 @@
+output:
+  resolution: 512            # all aligned images normalised to this square size
+  format: "JPEG"
+  quality: 95                # JPEG compression quality
+
+quality_scoring:
+  blur:
+    method: "laplacian_variance"
+    min_score: 80.0          # images below this are discarded
+  lighting:
+    min_uniformity: 0.35     # 0=completely uneven, 1=perfectly uniform
+    max_brightness: 245      # overexposed threshold (0-255)
+    min_brightness: 15       # underexposed threshold
+  resolution:
+    min_width: 200
+    min_height: 200
+
+face_detection:
+  primary: "mtcnn"
+  fallback: "retinaface"
+  min_face_confidence: 0.90
+  max_faces_allowed: 1       # discard if more than 1 face detected
+  min_face_size_px: 80       # minimum face bounding box dimension
+
+landmark_extraction:
+  model: "mediapipe"
+  num_landmarks: 478
+  min_detection_confidence: 0.75
+  min_tracking_confidence: 0.75
+  refine_landmarks: true
+
+alignment:
+  target_size: 512
+  eye_distance_ratio: 0.35   # target eye distance as fraction of image width
+  margin: 0.25               # padding around face as fraction of face size
+
+pair_validation:
+  max_yaw_difference_deg: 15.0
+  max_pitch_difference_deg: 15.0
+  max_roll_difference_deg: 10.0
+
+segmentation:
+  config_path: "configs/zones.yaml"

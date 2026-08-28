@@ -1,0 +1,30 @@
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1                           # single worker to keep model in memory
+  log_level: "info"
+
+model:
+  hf_repo_id: ""                       # set in .env: HF_REPO_ID
+  checkpoint_tag: "best"
+  device: "cpu"                        # Oracle Arm A1 — CPU inference
+  load_in_8bit: false
+
+request:
+  max_image_size_bytes: 5242880        # 5MB
+  allowed_mime_types: ["image/jpeg", "image/png", "image/webp"]
+  supported_treatments:
+    - botulinum_toxin
+    - ha_filler
+
+rate_limiting:
+  requests_per_minute_per_ip: 10
+  burst: 3
+
+preprocessing:
+  config_path: "configs/pipeline.yaml"
+
+response:
+  output_format: "JPEG"
+  output_quality: 90
+  include_metadata: true

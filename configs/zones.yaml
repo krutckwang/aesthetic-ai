@@ -1,0 +1,130 @@
+# MediaPipe 478-point face mesh landmark-to-zone mapping.
+# Landmark indices reference: https://github.com/google/mediapipe/blob/master/mediapipe/modules/face_geometry/data/canonical_face_model_uv_visualization.png
+# Each zone lists the landmark indices that define it.
+# A single landmark may belong to multiple zones (overlap is intentional at boundaries).
+
+zones:
+
+  # ── UPPER FACE ──────────────────────────────────────────────────────────────
+  forehead_lines:
+    landmark_indices: [10, 151, 9, 8, 107, 336, 296, 334, 293, 300,
+                       55, 65, 52, 53, 46, 285, 295, 282, 283, 276,
+                       70, 63, 105, 66, 107, 336, 296, 334, 293, 300]
+    description: "Horizontal forehead wrinkle zone"
+
+  glabellar_complex:
+    landmark_indices: [9, 8, 168, 6, 197, 195, 5, 4, 1, 19,
+                       94, 2, 164, 0, 11, 12, 13, 14, 15, 16,
+                       17, 18, 200, 199, 175, 152]
+    description: "Frown lines and 11s between eyebrows"
+
+  temporal_region:
+    landmark_indices: [127, 356, 54, 284, 103, 332, 93, 323,
+                       162, 389, 21, 251, 54, 284]
+    description: "Temporal hollow and lateral face"
+
+  brow_position:
+    landmark_indices: [70, 63, 105, 66, 107, 55, 65, 52, 53, 46,
+                       300, 293, 334, 296, 336, 285, 295, 282, 283, 276]
+    description: "Eyebrow position and brow lift zone"
+
+  # ── MID FACE ────────────────────────────────────────────────────────────────
+  periorbital:
+    landmark_indices: [33, 7, 163, 144, 145, 153, 154, 155, 133,
+                       246, 161, 160, 159, 158, 157, 173,
+                       362, 382, 381, 380, 374, 373, 390, 249,
+                       263, 466, 388, 387, 386, 385, 384, 398]
+    description: "Crow's feet, under-eye hollows, tear trough"
+
+  nose:
+    landmark_indices: [1, 2, 5, 4, 6, 19, 94, 164, 197, 168,
+                       48, 278, 115, 344, 220, 440, 64, 294,
+                       218, 438, 237, 457, 44, 274]
+    description: "Nose dorsum, tip, bridge, alar"
+
+  nasolabial_folds:
+    landmark_indices: [36, 266, 203, 423, 92, 322, 216, 436,
+                       206, 426, 207, 427, 213, 433, 147, 376]
+    description: "Nasolabial fold crease zone"
+
+  cheek_malar:
+    landmark_indices: [117, 346, 50, 280, 101, 330, 118, 347,
+                       119, 348, 116, 345, 123, 352, 111, 340,
+                       187, 411, 205, 425, 36, 266]
+    description: "Cheek body and malar eminence"
+
+  midface_volume:
+    landmark_indices: [117, 346, 50, 280, 101, 330, 187, 411,
+                       205, 425, 36, 266, 203, 423, 92, 322]
+    description: "Overall midface volume zone"
+
+  # ── LOWER FACE ──────────────────────────────────────────────────────────────
+  lips:
+    landmark_indices: [61, 291, 39, 269, 40, 270, 185, 409,
+                       0, 267, 14, 17, 84, 314, 181, 405,
+                       91, 321, 146, 375, 78, 308, 95, 324,
+                       88, 318, 178, 402, 87, 317, 86, 316,
+                       85, 315, 180, 404, 191, 415, 80, 310,
+                       81, 311, 82, 312, 13, 312]
+    description: "Lip volume, border, philtrum"
+
+  perioral_lines:
+    landmark_indices: [92, 322, 62, 292, 96, 325, 89, 319,
+                       90, 320, 91, 321, 186, 410, 43, 273]
+    description: "Perioral / smoker's lines"
+
+  marionette_lines:
+    landmark_indices: [92, 322, 58, 288, 172, 397, 136, 365,
+                       150, 379, 149, 378, 148, 377, 176, 400]
+    description: "Marionette line crease zone"
+
+  chin:
+    landmark_indices: [199, 175, 152, 200, 18, 17, 16, 15,
+                       14, 13, 12, 11, 10, 9, 8, 7,
+                       194, 418, 430, 210, 214, 434]
+    description: "Chin projection and shape"
+
+  jawline:
+    landmark_indices: [172, 397, 136, 365, 150, 379, 149, 378,
+                       148, 377, 176, 400, 58, 288, 132, 361,
+                       215, 435, 138, 367, 234, 454, 127, 356]
+    description: "Jawline definition and jowl zone"
+
+  masseter:
+    landmark_indices: [127, 356, 234, 454, 93, 323, 132, 361,
+                       58, 288, 172, 397, 136, 365, 138, 367]
+    description: "Masseter muscle / jaw slimming zone"
+
+  # ── NECK & DÉCOLLETAGE ──────────────────────────────────────────────────────
+  platysmal_bands:
+    landmark_indices: [152, 199, 175, 200, 194, 418]
+    description: "Platysmal band zone (chin–neck boundary)"
+
+  neck_laxity:
+    landmark_indices: [152, 199, 175, 200]
+    description: "Neck laxity zone (estimated from chin landmarks)"
+
+  decolletage:
+    landmark_indices: []    # out of MediaPipe face mesh range — inferred from image crop below chin
+    description: "Décolletage texture zone"
+
+  # ── FULL FACE / SKIN QUALITY ────────────────────────────────────────────────
+  skin_texture:
+    landmark_indices: []    # whole-face zone — applied as mask over full alignment
+    description: "Skin texture and pore size — whole face"
+
+  pigmentation:
+    landmark_indices: []
+    description: "Pigmentation and melasma zones"
+
+  redness_rosacea:
+    landmark_indices: []
+    description: "Redness and rosacea zones"
+
+  acne_scarring:
+    landmark_indices: []
+    description: "Acne scarring distribution"
+
+  overall_skin_tone:
+    landmark_indices: []
+    description: "Overall skin tone — whole face"

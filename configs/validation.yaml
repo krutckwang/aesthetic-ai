@@ -1,0 +1,40 @@
+# ── Validation thresholds ─────────────────────────────────────────────────────
+# Values marked UNCALIBRATED are placeholders.
+# Run: python -m crawler.validation.calibration
+# The calibration script will overwrite these with empirically derived values.
+
+calibrated: false   # flipped to true after calibration script runs
+
+layer1_structural:
+  min_confidence: 0.7        # UNCALIBRATED — structural heuristic score floor
+  explicit_label_required: true   # Gate 1: must have explicit before/after label
+
+layer2_nlp:
+  model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+  min_pairing_score: 0.65    # UNCALIBRATED — cosine similarity floor for pairing
+  languages: ["en", "ko", "pt"]
+  before_keywords:
+    en: ["before", "pre-treatment", "pre treatment", "prior to", "untreated"]
+    ko: ["전", "시술전", "치료전", "이전"]
+    pt: ["antes", "pré-tratamento", "antes do tratamento", "anterior"]
+  after_keywords:
+    en: ["after", "post-treatment", "post treatment", "results", "outcome", "following"]
+    ko: ["후", "시술후", "치료후", "이후", "결과"]
+    pt: ["depois", "após", "pós-tratamento", "resultado", "resultado final"]
+
+layer3_face_similarity:
+  model: "buffalo_l"         # InsightFace ArcFace model
+  min_cosine_similarity: 0.40  # UNCALIBRATED — same-person confirmation floor
+  device: "cpu"
+
+ordering_validation:
+  gate1_explicit_required: true
+  gate2_treatment_presence:
+    enabled: true
+    botulinum_toxin:
+      metric: "forehead_line_depth"    # MediaPipe-derived landmark distance ratio
+      min_reduction_ratio: 0.05        # UNCALIBRATED — after must show >= 5% reduction
+    ha_filler:
+      metric: "lip_volume_index"       # MediaPipe lip landmark convex hull area ratio
+      min_increase_ratio: 0.05         # UNCALIBRATED — after must show >= 5% increase
+  low_confidence_action: "store_exclude"   # store in DB but exclude from training

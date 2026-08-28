@@ -1,0 +1,71 @@
+general:
+  resolution: 512
+  seed: 42
+  device: "cuda"           # falls back to cpu automatically if cuda unavailable
+  mixed_precision: "fp16"  # fp16 for T4; set to "no" for CPU
+
+treatment_categories:
+  - botulinum_toxin
+  - ha_filler
+
+age_buckets: ["18-25", "26-35", "36-45", "46-55", "56-65", "65+"]
+fitzpatrick_types: [1, 2, 3, 4, 5, 6]
+
+data:
+  train_split: 0.80
+  val_split: 0.10
+  test_split: 0.10
+  min_class_fraction: 0.10   # trigger weighted sampler if any class below this
+  augmentation:
+    horizontal_flip: true
+    brightness_jitter: 0.1
+    contrast_jitter: 0.1
+    saturation_jitter: 0.05
+    hue_jitter: 0.02
+
+instruct_pix2pix:
+  base_model: "timbrooks/instruct-pix2pix"
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: ["to_q", "to_v", "to_k", "to_out.0"]
+  learning_rate: 1.0e-4
+  batch_size: 4
+  gradient_accumulation_steps: 4      # effective batch = 16
+  max_train_steps: 15000
+  warmup_steps: 500
+  lr_scheduler: "cosine"
+  gradient_checkpointing: true
+  max_grad_norm: 1.0
+  image_guidance_scale: 1.5
+  text_guidance_scale: 7.5
+  noise_offset: 0.05
+
+ip_adapter:
+  model_path: "h94/IP-Adapter"
+  subfolder: "models"
+  weight_name: "ip-adapter-full-face_sd15.bin"
+  scale: 0.8                           # identity conditioning strength
+
+cyclegan:
+  learning_rate: 2.0e-4
+  batch_size: 4
+  epochs: 200
+  lambda_cycle: 10.0
+  lambda_identity: 5.0
+  n_residual_blocks: 9
+  decay_epoch: 100
+
+evaluation:
+  fid_batch_size: 64
+  lpips_net: "alex"
+  eval_every_n_steps: 1000
+  test_set_size: 60                    # 30 botulinum_toxin + 30 ha_filler
+
+huggingface:
+  repo_id: ""                          # set in .env: HF_REPO_ID
+  checkpoint_metric: "lpips"          # best checkpoint selected by lowest LPIPS
+
+mlflow:
+  tracking_uri: "http://localhost:5000"
+  experiment_name: "aesthetic-ai-training"

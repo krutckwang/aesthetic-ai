@@ -1,0 +1,224 @@
+global:
+  default_rate_limit_seconds: 3.0      # seconds between requests per domain
+  max_retries: 4
+  backoff_factor: 2.0                   # exponential: 2, 4, 8, 16 seconds
+  request_timeout_seconds: 30
+  max_concurrent_static: 6             # httpx concurrent connections
+  max_concurrent_headless: 2           # Playwright Chromium instances (RAM limit)
+  user_agent: "AestheticAI-Research-Bot/0.1 (educational; contact: research@example.com)"
+  storage_base_path: "/mnt/block/aesthetic-ai"    # Oracle block volume mount
+  staging_db_path: "/mnt/block/aesthetic-ai/staging.db"
+  image_download_timeout_seconds: 60
+
+data_targets:
+  min_clean_pairs: 5000
+  target_clean_pairs: 10000
+  video_sources_activation_threshold: 5000   # activate video if below this
+
+sources:
+  realself:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: en
+    consent_tier: 1
+    calibration_source: true             # crawled first for threshold calibration
+    calibration_sample_size: 200
+    base_urls:
+      - "https://www.realself.com/botulinum-toxin/reviews"
+      - "https://www.realself.com/juvederm/reviews"
+      - "https://www.realself.com/restylane/reviews"
+      - "https://www.realself.com/lip-augmentation/reviews"
+      - "https://www.realself.com/dysport/reviews"
+      - "https://www.realself.com/xeomin/reviews"
+
+  clinic_sites:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 2
+    seed_discovery: true                 # uses search engine to discover clinic URLs
+
+  instagram:
+    enabled: false                       # DISABLED: aggressive bot detection, no proxy rotation
+    rendering: static
+    rate_limit_seconds: 10.0
+    language: en
+    consent_tier: 3
+    note: "Enable only with proxy rotation. Not in data volume targets."
+
+  reddit:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 3.0
+    language: en
+    consent_tier: 2
+    base_urls:
+      - "https://www.reddit.com/r/PlasticSurgery"
+      - "https://www.reddit.com/r/Injectables"
+      - "https://www.reddit.com/r/Botox"
+      - "https://www.reddit.com/r/SkincareAddiction"
+
+  pinterest:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: en
+    consent_tier: 2
+
+  tiktok_static:
+    enabled: false                       # DISABLED: aggressive bot detection
+    rendering: static
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 3
+    note: "Static post pages only. Enable only with proxy rotation."
+
+  brand_galleries:
+    enabled: true
+    rendering: headless                  # Playwright required — React/Angular SPAs
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 1
+    brands:
+      - name: allergan
+        base_url: "https://www.allerganaesthetics.com"
+      - name: galderma
+        base_url: "https://www.galderma.com"
+      - name: merz
+        base_url: "https://www.merzaesthetics.com"
+      - name: revance
+        base_url: "https://www.revance.com"
+      - name: evolus
+        base_url: "https://www.evolus.com"
+      - name: solta
+        base_url: "https://www.soltamedical.com"
+      - name: inmode
+        base_url: "https://www.inmodemd.com"
+      - name: candela
+        base_url: "https://www.candelamedical.com"
+      - name: cutera
+        base_url: "https://www.cutera.com"
+      - name: lumenis
+        base_url: "https://www.lumenis.com"
+      - name: fotona
+        base_url: "https://www.fotona.com"
+      - name: cynosure
+        base_url: "https://www.cynosure.com"
+      - name: teoxane
+        base_url: "https://www.teoxane.com"
+
+  open_access_pubs:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 3.0
+    language: en
+    consent_tier: 1
+    base_urls:
+      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=facial+aesthetic+before+after"
+      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=botulinum+toxin+before+after"
+      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=hyaluronic+acid+filler+before+after"
+
+  review_platforms:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: en
+    consent_tier: 2
+    platforms:
+      - name: healthgrades
+        base_url: "https://www.healthgrades.com"
+      - name: yelp
+        base_url: "https://www.yelp.com"
+      - name: ratemds
+        base_url: "https://www.ratemds.com"
+
+  professional_societies:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: en
+    consent_tier: 1
+    base_urls:
+      - "https://www.plasticsurgery.org"
+      - "https://www.aad.org"
+      - "https://www.asds.net"
+      - "https://www.baaps.org.uk"
+      - "https://www.isaps.org"
+
+  beauty_media:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 3.0
+    language: en
+    consent_tier: 2
+    base_urls:
+      - "https://www.newbeauty.com"
+      - "https://www.allure.com"
+      - "https://www.byrdie.com"
+      - "https://www.refinery29.com"
+
+  academy_portals:
+    enabled: true
+    rendering: headless
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 1
+    portals:
+      - name: galderma_institute
+        base_url: "https://galderma-institute.com"
+      - name: allergan_medical_institute
+        base_url: "https://www.allerganmedicalinstitute.com"
+      - name: sinclair_academy
+        base_url: "https://sinclairacademy.com"
+
+  korean_sources:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: ko
+    consent_tier: 2
+    base_urls:
+      - "https://blog.naver.com"     # search via Naver blog API
+      - "https://cafe.naver.com"
+
+  brazilian_sources:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: pt
+    consent_tier: 2
+
+  open_datasets:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 2.0
+    language: en
+    consent_tier: 1
+    sources:
+      - name: kaggle
+        search_terms: ["facial aesthetic before after", "botox before after", "filler before after"]
+      - name: huggingface
+        search_terms: ["aesthetic treatment", "facial aesthetic"]
+      - name: github
+        search_terms: ["facial aesthetic dataset", "before after face"]
+
+video_sources:
+  enabled: false                         # activated automatically if pairs < threshold
+  activation_threshold: 5000
+  youtube:
+    enabled: false
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 2
+    search_terms:
+      - "botox before after results"
+      - "lip filler before after"
+      - "juvederm before after"
+      - "dysport results"
+  tiktok_video:
+    enabled: false
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 3

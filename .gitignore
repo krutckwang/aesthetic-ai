@@ -1,0 +1,111 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.yaml
+
+# Model weights and large binary files (managed by DVC)
+*.bin
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.h5
+*.pkl
+*.pickle
+
+# DVC
+/dvc.lock
+/.dvc/cache
+/.dvc/tmp
+
+# Data and images (managed by DVC, not git)
+/data/
+/images/
+/processed/
+/aligned/
+/staging/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.mp4
+*.avi
+*.mov
+
+# SQLite databases (runtime state)
+*.db
+*.sqlite
+*.sqlite3
+
+# MLflow artifacts
+/mlruns/
+/mlflow/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.coveragerc
+
+# mypy
+.mypy_cache/
+*.mypy_cache/
+
+# ruff / linting caches
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Kaggle credentials (managed via env)
+kaggle.json
+
+# HuggingFace cache
+.cache/huggingface/
+
+# OS
+desktop.ini

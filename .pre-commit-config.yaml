@@ -1,0 +1,42 @@
+repos:
+  # ── Ruff: linting + formatting ────────────────────────────────────────────────
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # ── Mypy: static type checking ────────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-PyYAML
+          - types-requests
+          - sqlalchemy[mypy]
+        args: [--ignore-missing-imports]
+
+  # ── General file hygiene ──────────────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      - id: check-added-large-files
+        args: [--maxkb=500]          # block accidental model weight commits
+      - id: check-merge-conflict
+      - id: debug-statements         # catch leftover breakpoint() / pdb calls
+      - id: detect-private-key       # never commit API keys
+
+  # ── Secrets detection ─────────────────────────────────────────────────────────
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: (requirements.*\.txt|\.pre-commit-config\.yaml)
