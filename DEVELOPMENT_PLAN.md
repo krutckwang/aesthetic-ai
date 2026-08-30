@@ -144,7 +144,7 @@ Run: `python -m crawler.status`
 
 ---
 
-## Phase 2 — Image Processing Pipeline
+## Phase 2 — Image Processing Pipeline ✅ COMPLETE
 
 **Goal:** Quality-filter, align, and annotate all collected image pairs.  
 **Location:** `pipeline/`  
