@@ -231,7 +231,7 @@ Run: `python -m crawler.status`
 
 ---
 
-## Phase 3 — Database and Annotation
+## Phase 3 — Database and Annotation ✅ COMPLETE
 
 **Goal:** Finalize schema, auto-label treatments, verify training set integrity.  
 **Location:** `database/`  
@@ -240,35 +240,35 @@ Run: `python -m crawler.status`
 
 > Phase 3 runs in parallel with Phases 1 and 2 — schema and migrations are built first.
 
-### Step 3.1 — Schema and migrations
+### Step 3.1 — Schema and migrations ✅ COMPLETE
 
 | Task | File | Test |
 |---|---|---|
-| SQLAlchemy models | `database/models/__init__.py` | `tests/database/test_models.py` |
-| Alembic initial migration | `database/migrations/versions/001_initial.py` | `tests/database/test_migrations.py` |
-| Database session factory | `database/session.py` | — |
+| SQLAlchemy models | `database/models/__init__.py` ✅ | `tests/database/test_models.py` ✅ |
+| Alembic initial migration | `database/migrations/versions/001_initial.py` ✅ | `tests/database/test_migrations.py` ✅ |
+| Database session factory | `database/session.py` ✅ | — |
 
 ---
 
-### Step 3.2 — Auto-labelling
+### Step 3.2 — Auto-labelling ✅ COMPLETE
 
 | Task | File | Test |
 |---|---|---|
-| Treatment type extractor (multilingual NLP on source text) | `database/labelling/treatment_labeller.py` | `tests/database/test_treatment_labeller.py` |
-| Treatment brand extractor | `database/labelling/treatment_labeller.py` | same |
-| Zone auto-labeller (from landmark data) | `database/labelling/zone_labeller.py` | `tests/database/test_zone_labeller.py` |
+| Treatment type extractor (multilingual NLP on source text) | `database/labelling/treatment_labeller.py` ✅ | `tests/database/test_treatment_labeller.py` ✅ |
+| Treatment brand extractor | `database/labelling/treatment_labeller.py` ✅ | same |
+| Zone auto-labeller (from landmark data) | `database/labelling/zone_labeller.py` ✅ | `tests/database/test_zone_labeller.py` ✅ |
 
 **Rule:** Labels below confidence threshold written as NULL — never guessed.
 
 ---
 
-### Step 3.3 — Query helpers and DVC export
+### Step 3.3 — Query helpers and DVC export ✅ COMPLETE
 
 | Task | File | Test |
 |---|---|---|
-| Training set query (excludes quarantine, LOW ordering confidence) | `database/queries/training_set.py` | `tests/database/test_training_set.py` |
-| DVC dataset export script | `database/queries/export.py` | `tests/database/test_export.py` |
-| Class balance reporter | `database/queries/balance.py` | `tests/database/test_balance.py` |
+| Training set query (excludes quarantine, LOW ordering confidence) | `database/queries/training_set.py` ✅ | `tests/database/test_training_set.py` ✅ |
+| DVC dataset export script | `database/queries/export.py` ✅ | `tests/database/test_export.py` ✅ |
+| Class balance reporter | `database/queries/balance.py` ✅ | `tests/database/test_balance.py` ✅ |
 
 ---
 
