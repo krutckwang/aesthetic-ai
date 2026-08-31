@@ -72,10 +72,12 @@ class BaseSource(ABC):
         self.config = config
         self._robots_cache: dict[str, urllib.robotparser.RobotFileParser] = {}
         self._last_request_time: dict[str, float] = {}
+        import os
         self._client = httpx.Client(
             headers={"User-Agent": self._load_global_user_agent()},
             timeout=30,
             follow_redirects=True,
+            verify=os.getenv("CRAWLER_SSL_VERIFY", "1") != "0",
         )
         # Secondary pages discovered during extraction (two-stage crawl)
         self._discovered_pages: list[str] = []
@@ -238,13 +240,17 @@ class BaseSource(ABC):
             )
             return self._fetch_static(url)
 
+        import os
+        ssl_verify = os.getenv("CRAWLER_SSL_VERIFY", "1") != "0"
         try:
             with sync_playwright() as pw:
                 browser = pw.chromium.launch(headless=True)
-                page = browser.new_page(
-                    user_agent=self._load_global_user_agent(),
+                context = browser.new_context(
+                    # Don't override UA — let Playwright use Chrome's real UA
                     extra_http_headers={"Accept-Language": "en-US,en;q=0.9"},
+                    ignore_https_errors=not ssl_verify,
                 )
+                page = context.new_page()
                 page.goto(url, wait_until="networkidle", timeout=30_000)
                 html = page.content()
                 browser.close()

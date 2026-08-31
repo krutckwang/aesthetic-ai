@@ -17,20 +17,22 @@ data_targets:
 
 sources:
   realself:
-    enabled: true
-    rendering: static
-    rate_limit_seconds: 4.0
+    enabled: false                       # Blocked locally — enable on Oracle Cloud server
+    rendering: headless                  # Playwright — bypasses bot detection with real Chrome UA
+    rate_limit_seconds: 6.0
     language: en
     consent_tier: 1
     calibration_source: true             # crawled first for threshold calibration
     calibration_sample_size: 200
     base_urls:
-      - "https://www.realself.com/botulinum-toxin/reviews"
-      - "https://www.realself.com/juvederm/reviews"
-      - "https://www.realself.com/restylane/reviews"
-      - "https://www.realself.com/lip-augmentation/reviews"
-      - "https://www.realself.com/dysport/reviews"
-      - "https://www.realself.com/xeomin/reviews"
+      - "https://www.realself.com/reviews/botox"
+      - "https://www.realself.com/reviews/juvederm"
+      - "https://www.realself.com/reviews/restylane"
+      - "https://www.realself.com/reviews/lip-augmentation"
+      - "https://www.realself.com/reviews/dysport"
+      - "https://www.realself.com/reviews/xeomin"
+      - "https://www.realself.com/reviews/cheek-augmentation"
+      - "https://www.realself.com/reviews/rhinoplasty"
 
   clinic_sites:
     enabled: true
