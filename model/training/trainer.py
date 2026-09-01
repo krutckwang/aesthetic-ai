@@ -88,7 +88,7 @@ class InstructPix2PixTrainer:
             weight_decay=self.config.weight_decay,
         )
         if self.config.mixed_precision == "fp16":
-            self._scaler = torch.cuda.amp.GradScaler()
+            self._scaler = torch.amp.GradScaler('cuda')
 
         # Freeze VAE and text encoder — never trained
         for model in (self.vae, self.text_encoder):
@@ -164,7 +164,7 @@ class InstructPix2PixTrainer:
         return loss.item()
 
     def _encode(self, images: torch.Tensor) -> torch.Tensor:
-        latents = self.vae.encode(images).latent_dist.sample()
+        latents = self.vae.encode(images.to(dtype=self.vae.dtype)).latent_dist.sample()
         return latents * self.vae.config.scaling_factor
 
     def _get_encoder_hidden_states(self, input_ids, pixel_values) -> torch.Tensor:
