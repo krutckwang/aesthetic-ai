@@ -25,14 +25,30 @@ sources:
     calibration_source: true             # crawled first for threshold calibration
     calibration_sample_size: 200
     base_urls:
+      # Injectables
       - "https://www.realself.com/reviews/botox"
-      - "https://www.realself.com/reviews/juvederm"
-      - "https://www.realself.com/reviews/restylane"
-      - "https://www.realself.com/reviews/lip-augmentation"
       - "https://www.realself.com/reviews/dysport"
       - "https://www.realself.com/reviews/xeomin"
+      - "https://www.realself.com/reviews/juvederm"
+      - "https://www.realself.com/reviews/restylane"
+      - "https://www.realself.com/reviews/sculptra"
+      - "https://www.realself.com/reviews/lip-augmentation"
+      - "https://www.realself.com/reviews/lip-filler"
       - "https://www.realself.com/reviews/cheek-augmentation"
+      - "https://www.realself.com/reviews/under-eye-filler"
+      - "https://www.realself.com/reviews/kybella"
+      - "https://www.realself.com/reviews/chin-filler"
+      # Surgical
       - "https://www.realself.com/reviews/rhinoplasty"
+      - "https://www.realself.com/reviews/facelift"
+      - "https://www.realself.com/reviews/blepharoplasty"
+      - "https://www.realself.com/reviews/brow-lift"
+      - "https://www.realself.com/reviews/neck-lift"
+      # Skin
+      - "https://www.realself.com/reviews/chemical-peel"
+      - "https://www.realself.com/reviews/laser-skin-resurfacing"
+      - "https://www.realself.com/reviews/microneedling"
+      - "https://www.realself.com/reviews/thread-lift"
 
   clinic_sites:
     enabled: true
@@ -84,16 +100,37 @@ sources:
     language: en
     consent_tier: 1
     brands:
+      # Allergan — Botox Cosmetic and Juvederm patient galleries (treatment label in URL)
+      - name: botox_cosmetic
+        base_url: "https://www.botoxcosmetic.com/real-results"
+      - name: juvederm_results
+        base_url: "https://www.juvederm.com/real-results"
+      - name: juvederm_lip
+        base_url: "https://www.juvederm.com/real-results/lips"
+      - name: juvederm_cheek
+        base_url: "https://www.juvederm.com/real-results/cheeks"
       - name: allergan
         base_url: "https://www.allerganaesthetics.com"
+      # Galderma — Restylane and Sculptra
+      - name: restylane_results
+        base_url: "https://www.restylane.com/before-and-after"
+      - name: sculptra_results
+        base_url: "https://www.sculptra.com/before-after"
       - name: galderma
         base_url: "https://www.galderma.com"
-      - name: merz
-        base_url: "https://www.merzaesthetics.com"
+      # Revance — Daxi (botox competitor)
+      - name: revance_results
+        base_url: "https://www.revance.com/before-and-after"
       - name: revance
         base_url: "https://www.revance.com"
+      # Evolus — Jeuveau
+      - name: evolus_results
+        base_url: "https://www.evolus.com/before-after"
       - name: evolus
         base_url: "https://www.evolus.com"
+      # Medical device brands (laser, skin treatments)
+      - name: merz
+        base_url: "https://www.merzaesthetics.com"
       - name: solta
         base_url: "https://www.soltamedical.com"
       - name: inmode
@@ -143,10 +180,28 @@ sources:
     language: en
     consent_tier: 1
     base_urls:
-      - "https://www.plasticsurgery.org"
-      - "https://www.aad.org"
-      - "https://www.asds.net"
-      - "https://www.baaps.org.uk"
+      # ASPS — procedure-specific gallery pages so treatment label is in the URL
+      - "https://www.plasticsurgery.org/photo-gallery/botulinum-toxin"
+      - "https://www.plasticsurgery.org/photo-gallery/lip-augmentation"
+      - "https://www.plasticsurgery.org/photo-gallery/dermal-fillers"
+      - "https://www.plasticsurgery.org/photo-gallery/rhinoplasty"
+      - "https://www.plasticsurgery.org/photo-gallery/facelift"
+      - "https://www.plasticsurgery.org/photo-gallery/brow-lift"
+      - "https://www.plasticsurgery.org/photo-gallery/eyelid-surgery"
+      - "https://www.plasticsurgery.org/photo-gallery/chin-augmentation"
+      - "https://www.plasticsurgery.org/photo-gallery/cheek-augmentation"
+      - "https://www.plasticsurgery.org/photo-gallery/kybella"
+      - "https://www.plasticsurgery.org/photo-gallery/chemical-peel"
+      - "https://www.plasticsurgery.org/photo-gallery/laser-skin-resurfacing"
+      # AAD
+      - "https://www.aad.org/public/cosmetic/fillers"
+      - "https://www.aad.org/public/cosmetic/laser-light-therapy"
+      - "https://www.aad.org/public/cosmetic/botox"
+      # BAAPS (UK)
+      - "https://www.baaps.org.uk/patients/procedures/rhinoplasty"
+      - "https://www.baaps.org.uk/patients/procedures/facelift"
+      - "https://www.baaps.org.uk/patients/procedures/blepharoplasty"
+      # ISAPS
       - "https://www.isaps.org"
 
   beauty_media:
