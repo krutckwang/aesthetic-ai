@@ -1,173 +1,162 @@
-"""Reddit public subreddit crawler for aesthetic before/after posts."""
+"""Reddit public subreddit crawler — uses the JSON API.
+
+Avoids old.reddit.com (which blocks all bots via robots.txt) by hitting
+/r/{sub}.json directly on www.reddit.com.  The JSON API is publicly
+accessible, returns gallery metadata including full-resolution image URLs,
+and supports cursor-based pagination via the `after` token.
+"""
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Iterator
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
 from loguru import logger
 
 from crawler.base import BaseSource, ConsentTier, RawImagePair
 
 
-# Title keywords that signal a before/after post
 TITLE_KEYWORDS = frozenset([
     "before", "after", "results", "progress", "transformation",
-    "botox", "filler", "juvederm", "restylane", "dysport",
+    "botox", "filler", "juvederm", "restylane", "dysport", "sculptra",
+    "rhinoplasty", "rhino", "blepharoplasty", "facelift",
     "1 month", "2 months", "3 months", "6 months", "1 year",
-    "weeks later", "day 1", "day 14",
+    "weeks later", "day 1", "day 14", "week 1", "week 2",
 ])
 
-# Image URL patterns that indicate direct images
-IMAGE_URL_RE = re.compile(r"\.(jpe?g|png|webp|gif)(\?.*)?$", re.IGNORECASE)
-REDDIT_IMAGE_HOSTS = frozenset(["i.redd.it", "i.imgur.com", "preview.redd.it"])
+IMAGE_URL_RE = re.compile(r"\.(jpe?g|png|webp)(\?.*)?$", re.IGNORECASE)
+
+# Maps subreddit name (lowercase) → treatment category stored in metadata
+SUBREDDIT_TREATMENT: dict[str, str] = {
+    "rhinoplasty":            "rhinoplasty",
+    "jawsurgery":             "jawline_filler",
+    "facialplasticsurgery":   "facelift",
+    "eyelidsurgery":          "blepharoplasty",
+    "fillers":                "dermal_filler",
+    "injectables":            "dermal_filler",
+    "botox":                  "botox",
+    "plasticsurgery":         None,           # mixed — no single label
+    "plasticsurgeryrecovery": None,
+    "skincareaddiction":      None,
+}
+
+# Crawl hot + top-all for each subreddit to maximise coverage
+LISTING_SUFFIXES = [
+    ".json?limit=100",
+    "/top.json?t=all&limit=100",
+]
+
+# Max pagination pages per listing (100 posts each)
+MAX_PAGES = 5
 
 
 class RedditSource(BaseSource):
     """
-    Crawls aesthetic subreddits (r/PlasticSurgery, r/Injectables, r/Botox).
-    Uses old.reddit.com for static HTML listing pages.
-    Post pages are queued for second-stage extraction of gallery images.
-    Consent tier: 2 — users self-post but no explicit release language.
+    Crawls aesthetic subreddits via the Reddit JSON API.
+
+    Stage 1: Listing pages (.json) — filter posts by title keywords,
+             queue gallery posts for pair extraction.
+    Stage 2: Gallery posts embedded in listing JSON — extract image pairs
+             directly from media_metadata without a second HTTP request.
     """
 
     def iter_page_urls(self) -> Iterator[str]:
         for base_url in self.config.base_urls:
-            old_url = base_url.replace("www.reddit.com", "old.reddit.com")
-            # Yield up to 10 paginated listing pages per subreddit
-            for _ in range(10):
-                yield old_url
-                break  # pagination token injected via _next_page_token() after first fetch
+            clean = base_url.rstrip("/")
+            # Strip any existing path suffix so we always start from sub root
+            # e.g. https://www.reddit.com/r/rhinoplasty
+            for suffix in LISTING_SUFFIXES:
+                yield f"{clean}{suffix}"
 
     def extract_pairs_from_page(self, html: str, page_url: str) -> list[RawImagePair]:
-        soup = BeautifulSoup(html, "lxml")
+        try:
+            data = json.loads(html)
+        except (json.JSONDecodeError, ValueError):
+            logger.warning(f"[reddit] Non-JSON response from {page_url}")
+            return []
 
-        # Listing page: queue candidate post URLs for second-stage extraction
-        if self._is_listing_page(page_url):
-            return self._process_listing_page(soup, page_url)
+        listing = data.get("data", {})
+        posts = listing.get("children", [])
+        after_token = listing.get("after")
 
-        # Post page: extract before/after images from the post itself
-        return self._process_post_page(soup, page_url)
+        subreddit = self._subreddit_from_url(page_url)
+        treatment = SUBREDDIT_TREATMENT.get(subreddit.lower()) if subreddit else None
 
-    # ── Listing page ──────────────────────────────────────────────────────────
-
-    def _process_listing_page(self, soup: BeautifulSoup, page_url: str) -> list[RawImagePair]:
-        """Find candidate posts and queue their URLs for second-stage crawl."""
-        queued = 0
-        for post in soup.select(".thing.link"):
-            title_el = post.select_one("a.title")
-            if not title_el:
+        pairs: list[RawImagePair] = []
+        for wrapper in posts:
+            post = wrapper.get("data", {})
+            title = post.get("title", "").lower()
+            if not any(kw in title for kw in TITLE_KEYWORDS):
                 continue
-            title_text = title_el.get_text(strip=True).lower()
+            pairs.extend(self._pairs_from_post(post, treatment))
 
-            if not any(kw in title_text for kw in TITLE_KEYWORDS):
-                continue
+        # Paginate: queue next page if cursor exists and we haven't gone too deep
+        page_num = self._page_number(page_url)
+        if after_token and page_num < MAX_PAGES:
+            base = page_url.split("&after=")[0]
+            self._queue_page(f"{base}&after={after_token}")
 
-            post_url = post.get("data-url", "")
-            permalink = post.get("data-permalink", "")
+        logger.debug(f"[reddit] {len(pairs)} pairs from {page_url}")
+        return pairs
 
-            # Direct image links: build a synthetic pair from post data-url
-            if post_url and IMAGE_URL_RE.search(post_url):
-                # Single image post — can't form a pair from listing page alone
-                # Queue the comments page to look for a paired image
-                if permalink:
-                    full_permalink = urljoin("https://old.reddit.com", permalink)
-                    self._queue_page(full_permalink)
-                    queued += 1
-            elif permalink:
-                # Gallery or self-post — queue the post page
-                full_permalink = urljoin("https://old.reddit.com", permalink)
-                self._queue_page(full_permalink)
-                queued += 1
+    # ── Post extraction ───────────────────────────────────────────────────────
 
-        # Pagination: follow "next" link on listing pages
-        next_link = soup.select_one("span.next-button a")
-        if next_link:
-            next_url = next_link.get("href", "")
-            if next_url:
-                self._queue_page(next_url)
+    def _pairs_from_post(self, post: dict, treatment: str | None) -> list[RawImagePair]:
+        source_url = f"https://www.reddit.com{post.get('permalink', '')}"
 
-        logger.debug(f"[reddit] Queued {queued} candidate posts from {page_url}")
+        # Reddit gallery post: images stored in media_metadata
+        if post.get("is_gallery") and post.get("media_metadata"):
+            images = self._gallery_images(post["media_metadata"])
+            if len(images) >= 2:
+                mid = len(images) // 2
+                return [
+                    self._make_pair(b, a, source_url, "gallery", treatment)
+                    for b, a in zip(images[:mid], images[mid:])
+                ]
+
         return []
-
-    # ── Post page ─────────────────────────────────────────────────────────────
-
-    def _process_post_page(self, soup: BeautifulSoup, page_url: str) -> list[RawImagePair]:
-        """Extract before/after image pairs from a Reddit post page."""
-        pairs: list[RawImagePair] = []
-
-        # Strategy 1: Reddit gallery (multiple images in one post)
-        gallery_imgs = self._extract_gallery_images(soup, page_url)
-        if len(gallery_imgs) >= 2:
-            # Pair first half as before, second half as after
-            mid = len(gallery_imgs) // 2
-            for b, a in zip(gallery_imgs[:mid], gallery_imgs[mid:]):
-                pairs.append(self._make_pair(b, a, page_url, source="gallery"))
-
-        # Strategy 2: Two direct image links with before/after alt text or title
-        if not pairs:
-            pairs = self._extract_titled_image_pairs(soup, page_url)
-
-        logger.debug(f"[reddit] {len(pairs)} pairs extracted from post {page_url}")
-        return pairs
-
-    def _extract_gallery_images(self, soup: BeautifulSoup, page_url: str) -> list[str]:
-        """Extract image URLs from a Reddit gallery post."""
-        urls: list[str] = []
-
-        # Reddit gallery items are in <a> tags pointing to i.redd.it
-        for a in soup.select("a[href]"):
-            href = a.get("href", "")
-            parsed = urlparse(href)
-            if parsed.netloc in REDDIT_IMAGE_HOSTS and IMAGE_URL_RE.search(href):
-                if href not in urls:
-                    urls.append(href)
-
-        # Also check <img> tags with reddit CDN sources
-        for img in soup.select("img[src]"):
-            src = img.get("src", "")
-            parsed = urlparse(src)
-            if parsed.netloc in REDDIT_IMAGE_HOSTS and IMAGE_URL_RE.search(src):
-                if src not in urls:
-                    urls.append(src)
-
-        return urls
-
-    def _extract_titled_image_pairs(
-        self, soup: BeautifulSoup, page_url: str
-    ) -> list[RawImagePair]:
-        """Look for two images where title/alt text indicates before and after."""
-        pairs: list[RawImagePair] = []
-        before_url: str | None = None
-        after_url: str | None = None
-
-        for img in soup.find_all("img", src=True):
-            alt = (img.get("alt") or "").lower()
-            src = img.get("src", "")
-            if not src or not IMAGE_URL_RE.search(src):
-                continue
-            if "before" in alt and before_url is None:
-                before_url = src
-            elif "after" in alt and after_url is None:
-                after_url = src
-
-        if before_url and after_url:
-            pairs.append(self._make_pair(before_url, after_url, page_url, "titled_alt"))
-        return pairs
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _is_listing_page(url: str) -> bool:
-        path = urlparse(url).path.rstrip("/")
-        # Listing pages end in /r/<subreddit> or /r/<subreddit>/top etc.
-        return bool(re.match(r"^/r/[^/]+(/\w+)?$", path))
+    def _gallery_images(media_metadata: dict) -> list[str]:
+        """Return full-resolution URLs from a Reddit gallery's media_metadata."""
+        urls: list[str] = []
+        for item in media_metadata.values():
+            if item.get("status") != "valid":
+                continue
+            src = item.get("s", {})
+            url = src.get("u", "") or src.get("gif", "")
+            url = url.replace("&amp;", "&")  # Reddit escapes & in JSON
+            if url and IMAGE_URL_RE.search(url.split("?")[0]):
+                urls.append(url)
+        return urls
+
+    @staticmethod
+    def _subreddit_from_url(url: str) -> str:
+        """Extract subreddit name from a .json listing URL."""
+        path = urlparse(url).path  # e.g. /r/rhinoplasty/top.json
+        match = re.search(r"/r/([^/]+)", path)
+        return match.group(1) if match else ""
+
+    @staticmethod
+    def _page_number(url: str) -> int:
+        """Count how many &after= params are chained (proxy for page depth)."""
+        return url.count("after=")
 
     def _make_pair(
-        self, before_url: str, after_url: str, source_url: str, source: str = ""
+        self,
+        before_url: str,
+        after_url: str,
+        source_url: str,
+        method: str,
+        treatment: str | None = None,
     ) -> RawImagePair:
+        metadata: dict = {"extraction_method": method}
+        if treatment:
+            metadata["treatment_category"] = treatment
         return RawImagePair(
             before_url=before_url,
             after_url=after_url,
@@ -175,5 +164,5 @@ class RedditSource(BaseSource):
             source_name=self.config.name,
             language=self.config.language,
             consent_tier=ConsentTier(self.config.consent_tier),
-            metadata={"extraction_method": source},
+            metadata=metadata,
         )

@@ -65,7 +65,7 @@ sources:
       - "https://www.reddit.com/r/PlasticSurgeryRecovery"
 
   pinterest:
-    enabled: true
+    enabled: false                       # blocks all bots via robots.txt
     rendering: static
     rate_limit_seconds: 4.0
     language: en
@@ -99,16 +99,13 @@ sources:
         base_url: "https://www.evolus.com/before-after"
 
   open_access_pubs:
-    enabled: true
+    enabled: false                       # PubMed search is JS-rendered, returns 0 results statically
     rendering: static
     rate_limit_seconds: 3.0
     language: en
     consent_tier: 1
     base_urls:
       - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=facial+aesthetic+before+after"
-      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=botulinum+toxin+before+after"
-      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=hyaluronic+acid+filler+before+after"
-      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=rhinoplasty+before+after+photos"
 
   review_platforms:
     enabled: true
@@ -129,27 +126,13 @@ sources:
     language: en
     consent_tier: 1
     base_urls:
-      # ── ASPS ── procedure-specific galleries (treatment label in URL)
-      - "https://www.plasticsurgery.org/photo-gallery/botulinum-toxin"
-      - "https://www.plasticsurgery.org/photo-gallery/lip-augmentation"
-      - "https://www.plasticsurgery.org/photo-gallery/dermal-fillers"
-      - "https://www.plasticsurgery.org/photo-gallery/rhinoplasty"
-      - "https://www.plasticsurgery.org/photo-gallery/facelift"
-      - "https://www.plasticsurgery.org/photo-gallery/brow-lift"
-      - "https://www.plasticsurgery.org/photo-gallery/eyelid-surgery"
-      - "https://www.plasticsurgery.org/photo-gallery/chin-augmentation"
-      - "https://www.plasticsurgery.org/photo-gallery/cheek-augmentation"
-      - "https://www.plasticsurgery.org/photo-gallery/kybella"
-      - "https://www.plasticsurgery.org/photo-gallery/chemical-peel"
-      - "https://www.plasticsurgery.org/photo-gallery/laser-skin-resurfacing"
-      # ── AAD ──
-      - "https://www.aad.org/public/cosmetic/fillers"
-      - "https://www.aad.org/public/cosmetic/laser-light-therapy"
-      - "https://www.aad.org/public/cosmetic/botox"
-      # ── BAAPS (UK) ──
+      # ── BAAPS (UK) — static HTML, treatment label in URL ──
       - "https://www.baaps.org.uk/patients/procedures/rhinoplasty"
       - "https://www.baaps.org.uk/patients/procedures/facelift"
       - "https://www.baaps.org.uk/patients/procedures/blepharoplasty"
+      - "https://www.baaps.org.uk/patients/procedures/browlift"
+      - "https://www.baaps.org.uk/patients/procedures/necklift"
+      # NOTE: plasticsurgery.org and aad.org are JS-rendered — skip locally
       # ── SmartBeautyGuide (ASAPS patient portal) — treatment in URL ──
       - "https://www.smartbeautyguide.com/before-and-after/botox"
       - "https://www.smartbeautyguide.com/before-and-after/lip-augmentation"
