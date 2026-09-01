@@ -1,0 +1,255 @@
+global:
+  default_rate_limit_seconds: 3.0
+  max_retries: 4
+  backoff_factor: 2.0
+  request_timeout_seconds: 30
+  max_concurrent_static: 4
+  max_concurrent_headless: 0             # no headless locally
+  user_agent: "AestheticAI-Research-Bot/0.1 (educational; contact: research@example.com)"
+  storage_base_path: "data"              # relative to project root
+  staging_db_path: "data/staging.db"
+  image_download_timeout_seconds: 60
+
+data_targets:
+  min_clean_pairs: 5000
+  target_clean_pairs: 10000
+  video_sources_activation_threshold: 5000
+
+sources:
+  realself:
+    enabled: false                       # headless + proxy required
+    rendering: headless
+    rate_limit_seconds: 6.0
+    language: en
+    consent_tier: 1
+    calibration_source: true
+    calibration_sample_size: 200
+    base_urls:
+      - "https://www.realself.com/reviews/botox"
+      - "https://www.realself.com/reviews/juvederm"
+      - "https://www.realself.com/reviews/rhinoplasty"
+
+  clinic_sites:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 2
+    seed_discovery: true
+
+  instagram:
+    enabled: false
+    rendering: static
+    rate_limit_seconds: 10.0
+    language: en
+    consent_tier: 3
+
+  reddit:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 3.0
+    language: en
+    consent_tier: 2
+    base_urls:
+      # Original subs
+      - "https://www.reddit.com/r/PlasticSurgery"
+      - "https://www.reddit.com/r/Injectables"
+      - "https://www.reddit.com/r/Botox"
+      - "https://www.reddit.com/r/SkincareAddiction"
+      # New procedure-specific subs — high label signal
+      - "https://www.reddit.com/r/rhinoplasty"
+      - "https://www.reddit.com/r/jawsurgery"
+      - "https://www.reddit.com/r/facialplasticsurgery"
+      - "https://www.reddit.com/r/eyelidsurgery"
+      - "https://www.reddit.com/r/fillers"
+      - "https://www.reddit.com/r/PlasticSurgeryRecovery"
+
+  pinterest:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: en
+    consent_tier: 2
+
+  tiktok_static:
+    enabled: false
+    rendering: static
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 3
+
+  brand_galleries:
+    enabled: false                       # headless (React SPAs) — enable on cloud
+    rendering: headless
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 1
+    brands:
+      - name: botox_cosmetic
+        base_url: "https://www.botoxcosmetic.com/real-results"
+      - name: juvederm_results
+        base_url: "https://www.juvederm.com/real-results"
+      - name: restylane_results
+        base_url: "https://www.restylane.com/before-and-after"
+      - name: sculptra_results
+        base_url: "https://www.sculptra.com/before-after"
+      - name: revance_results
+        base_url: "https://www.revance.com/before-and-after"
+      - name: evolus_results
+        base_url: "https://www.evolus.com/before-after"
+
+  open_access_pubs:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 3.0
+    language: en
+    consent_tier: 1
+    base_urls:
+      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=facial+aesthetic+before+after"
+      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=botulinum+toxin+before+after"
+      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=hyaluronic+acid+filler+before+after"
+      - "https://www.ncbi.nlm.nih.gov/pmc/search/?query=rhinoplasty+before+after+photos"
+
+  review_platforms:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: en
+    consent_tier: 2
+    platforms:
+      - name: healthgrades
+        base_url: "https://www.healthgrades.com"
+      - name: ratemds
+        base_url: "https://www.ratemds.com"
+
+  professional_societies:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: en
+    consent_tier: 1
+    base_urls:
+      # ── ASPS ── procedure-specific galleries (treatment label in URL)
+      - "https://www.plasticsurgery.org/photo-gallery/botulinum-toxin"
+      - "https://www.plasticsurgery.org/photo-gallery/lip-augmentation"
+      - "https://www.plasticsurgery.org/photo-gallery/dermal-fillers"
+      - "https://www.plasticsurgery.org/photo-gallery/rhinoplasty"
+      - "https://www.plasticsurgery.org/photo-gallery/facelift"
+      - "https://www.plasticsurgery.org/photo-gallery/brow-lift"
+      - "https://www.plasticsurgery.org/photo-gallery/eyelid-surgery"
+      - "https://www.plasticsurgery.org/photo-gallery/chin-augmentation"
+      - "https://www.plasticsurgery.org/photo-gallery/cheek-augmentation"
+      - "https://www.plasticsurgery.org/photo-gallery/kybella"
+      - "https://www.plasticsurgery.org/photo-gallery/chemical-peel"
+      - "https://www.plasticsurgery.org/photo-gallery/laser-skin-resurfacing"
+      # ── AAD ──
+      - "https://www.aad.org/public/cosmetic/fillers"
+      - "https://www.aad.org/public/cosmetic/laser-light-therapy"
+      - "https://www.aad.org/public/cosmetic/botox"
+      # ── BAAPS (UK) ──
+      - "https://www.baaps.org.uk/patients/procedures/rhinoplasty"
+      - "https://www.baaps.org.uk/patients/procedures/facelift"
+      - "https://www.baaps.org.uk/patients/procedures/blepharoplasty"
+      # ── SmartBeautyGuide (ASAPS patient portal) — treatment in URL ──
+      - "https://www.smartbeautyguide.com/before-and-after/botox"
+      - "https://www.smartbeautyguide.com/before-and-after/lip-augmentation"
+      - "https://www.smartbeautyguide.com/before-and-after/dermal-fillers"
+      - "https://www.smartbeautyguide.com/before-and-after/rhinoplasty"
+      - "https://www.smartbeautyguide.com/before-and-after/facelift"
+      - "https://www.smartbeautyguide.com/before-and-after/brow-lift"
+      - "https://www.smartbeautyguide.com/before-and-after/eyelid-surgery"
+      - "https://www.smartbeautyguide.com/before-and-after/kybella"
+      # ── DocShop — dedicated before/after database, treatment in URL ──
+      - "https://www.docshop.com/education/cosmetic/face/botox/photos"
+      - "https://www.docshop.com/education/cosmetic/face/dermal-fillers/photos"
+      - "https://www.docshop.com/education/cosmetic/face/lip-augmentation/photos"
+      - "https://www.docshop.com/education/cosmetic/face/rhinoplasty/photos"
+      - "https://www.docshop.com/education/cosmetic/face/facelift/photos"
+      - "https://www.docshop.com/education/cosmetic/face/brow-lift/photos"
+      - "https://www.docshop.com/education/cosmetic/face/eyelid-surgery/photos"
+      # ── AAFPRS public site ──
+      - "https://www.facialplasticsurgery.net/before-after-photos"
+
+  beauty_media:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 3.0
+    language: en
+    consent_tier: 2
+    base_urls:
+      # Original sources
+      - "https://www.newbeauty.com"
+      - "https://www.allure.com"
+      - "https://www.byrdie.com"
+      - "https://www.refinery29.com"
+      # Medical/health — procedure how-tos with embedded before/after
+      - "https://www.healthline.com/health/botox"
+      - "https://www.healthline.com/health/lip-augmentation"
+      - "https://www.healthline.com/health/rhinoplasty"
+      - "https://www.healthline.com/health/dermal-fillers"
+      - "https://www.healthline.com/health/chemical-peel"
+      - "https://www.healthline.com/health/microneedling"
+      # Editorial beauty
+      - "https://www.self.com/beauty"
+      - "https://www.harpersbazaar.com/beauty/skin-care"
+      - "https://www.vogue.com/beauty"
+
+  academy_portals:
+    enabled: false                       # headless — enable on cloud
+    rendering: headless
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 1
+    portals:
+      - name: galderma_institute
+        base_url: "https://galderma-institute.com"
+      - name: allergan_medical_institute
+        base_url: "https://www.allerganmedicalinstitute.com"
+
+  korean_sources:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: ko
+    consent_tier: 2
+    base_urls:
+      - "https://blog.naver.com"
+      - "https://cafe.naver.com"
+
+  brazilian_sources:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 4.0
+    language: pt
+    consent_tier: 2
+
+  open_datasets:
+    enabled: true
+    rendering: static
+    rate_limit_seconds: 2.0
+    language: en
+    consent_tier: 1
+    sources:
+      - name: kaggle
+        search_terms: ["facial aesthetic before after", "botox before after", "filler before after"]
+      - name: huggingface
+        search_terms: ["aesthetic treatment", "facial aesthetic"]
+      - name: github
+        search_terms: ["facial aesthetic dataset", "before after face"]
+
+video_sources:
+  enabled: false
+  activation_threshold: 5000
+  youtube:
+    enabled: false
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 2
+    search_terms:
+      - "botox before after results"
+      - "lip filler before after"
+  tiktok_video:
+    enabled: false
+    rate_limit_seconds: 5.0
+    language: en
+    consent_tier: 3

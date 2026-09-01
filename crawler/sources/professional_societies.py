@@ -65,6 +65,28 @@ PROCEDURE_SLUG_MAP: dict[str, str] = {
     "prp": "prp",
     "platelet-rich-plasma": "prp",
     "thread-lift": "thread_lift",
+    # Injectable brand names (DocShop, SmartBeautyGuide, RealSelf use these as URL slugs)
+    "juvederm": "dermal_filler",
+    "restylane": "dermal_filler",
+    "sculptra": "dermal_filler",
+    "radiesse": "dermal_filler",
+    "belotero": "dermal_filler",
+    "cheek-filler": "dermal_filler",
+    "cheek-fillers": "dermal_filler",
+    "chin-filler": "jawline_filler",
+    "lip-fillers": "lip_filler",
+    "lip-filler-augmentation": "lip_filler",
+    "fillers": "dermal_filler",
+    # Botox competitor brand names
+    "dysport": "botox",
+    "xeomin": "botox",
+    "jeuveau": "botox",
+    "daxi": "botox",
+    # Surgical one-word compound variants
+    "browlift": "facelift",
+    "necklift": "facelift",
+    "upper-blepharoplasty": "blepharoplasty",
+    "lower-blepharoplasty": "blepharoplasty",
 }
 
 # Per-society CSS selector configs for before/after containers
@@ -89,10 +111,22 @@ SOCIETY_SELECTORS: dict[str, dict] = {
         "container": "[class*='gallery'], .case-results",
         "next_page": "a.next-page, a[rel='next']",
     },
+    "smartbeautyguide.com": {
+        "container": "[class*='before-after'], [class*='gallery'], .results-container, [class*='photo']",
+        "next_page": "a.next, a[rel='next'], [aria-label*='next']",
+    },
+    "docshop.com": {
+        "container": ".photo-gallery, [class*='before-after'], .gallery-container, [class*='photo-grid']",
+        "next_page": "a.next-page, a[aria-label*='next'], a[rel='next']",
+    },
+    "facialplasticsurgery.net": {
+        "container": "[class*='gallery'], [class*='before-after'], .case-photos, [class*='photo']",
+        "next_page": "a.next, a[rel='next']",
+    },
 }
 
 GALLERY_URL_RE = re.compile(
-    r"(photo[- ]?galleriy|before[- ]?after|patient[- ]?result|gallery|outcome|case-stud)",
+    r"(photo[- ]?gallery|before[- ]?after|patient[- ]?result|gallery|outcome|case-stud)",
     re.I,
 )
 
