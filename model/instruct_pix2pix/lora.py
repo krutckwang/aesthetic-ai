@@ -58,15 +58,17 @@ class LoRALinear(nn.Module):
         nn.init.zeros_(self.lora_B.weight)
 
         device = linear.weight.device
-        dtype = linear.weight.dtype
-        self.lora_A = self.lora_A.to(device=device, dtype=dtype)
-        self.lora_B = self.lora_B.to(device=device, dtype=dtype)
+        self.lora_A = self.lora_A.to(device=device)  # stay fp32 for GradScaler
+        self.lora_B = self.lora_B.to(device=device)
 
         for p in self.base.parameters():
             p.requires_grad = False
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.base(x) + self.lora_B(self.lora_A(self.dropout(x))) * self.scale
+        base_out = self.base(x)
+        # LoRA weights are fp32; cast input up, cast result back to match base output
+        lora_out = self.lora_B(self.lora_A(self.dropout(x.to(self.lora_A.weight.dtype)))) * self.scale
+        return base_out + lora_out.to(base_out.dtype)
 
     def merge_into_base(self) -> nn.Linear:
         """Return a new Linear with the LoRA delta merged in (for inference export)."""
