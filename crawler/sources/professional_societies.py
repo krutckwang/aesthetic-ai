@@ -18,6 +18,55 @@ AFTER_RE = re.compile(
     r"\bafter\b|\bpost[- ]?op\b|\bresult\b|\boutcome\b|\bpost-treatment\b", re.I
 )
 
+# Maps URL path slugs → canonical treatment category
+PROCEDURE_SLUG_MAP: dict[str, str] = {
+    # Injectables
+    "botulinum-toxin": "botox",
+    "botox": "botox",
+    "botox-cosmetic": "botox",
+    "lip-augmentation": "lip_filler",
+    "lip-augmentation---enhancement": "lip_filler",
+    "lip-enhancement": "lip_filler",
+    "lip-filler": "lip_filler",
+    "dermal-fillers": "dermal_filler",
+    "dermal-filler": "dermal_filler",
+    "hyaluronic-acid-filler": "dermal_filler",
+    "chin-augmentation": "jawline_filler",
+    "chin-implants": "jawline_filler",
+    "jawline-filler": "jawline_filler",
+    "cheek-augmentation": "dermal_filler",
+    "cheek-implants": "dermal_filler",
+    "under-eye-filler": "under_eye_filler",
+    "tear-trough": "under_eye_filler",
+    "kybella": "kybella",
+    # Surgical face
+    "rhinoplasty": "rhinoplasty",
+    "nose-surgery": "rhinoplasty",
+    "nose-reshaping": "rhinoplasty",
+    "facelift": "facelift",
+    "face-lift": "facelift",
+    "mini-facelift": "facelift",
+    "brow-lift": "facelift",
+    "forehead-lift": "facelift",
+    "eyelid-surgery": "blepharoplasty",
+    "blepharoplasty": "blepharoplasty",
+    "upper-eyelid-surgery": "blepharoplasty",
+    "lower-eyelid-surgery": "blepharoplasty",
+    "neck-lift": "facelift",
+    "otoplasty": "otoplasty",
+    "ear-surgery": "otoplasty",
+    # Skin treatments
+    "laser-skin-resurfacing": "laser_resurfacing",
+    "laser-resurfacing": "laser_resurfacing",
+    "laser-treatment": "laser_resurfacing",
+    "chemical-peel": "chemical_peel",
+    "chemical-peels": "chemical_peel",
+    "microneedling": "microneedling",
+    "prp": "prp",
+    "platelet-rich-plasma": "prp",
+    "thread-lift": "thread_lift",
+}
+
 # Per-society CSS selector configs for before/after containers
 SOCIETY_SELECTORS: dict[str, dict] = {
     "plasticsurgery.org": {
@@ -100,7 +149,7 @@ class ProfessionalSocietiesSource(BaseSource):
                     )
                     if b and a and IMAGE_EXT_RE.search(b) and IMAGE_EXT_RE.search(a):
                         pairs.append(
-                            self._make_pair(b, a, page_url, "society_container")
+                            self._make_pair(b, a, page_url, "society_container", soup)
                         )
 
         # Method 2: figure caption matching
@@ -118,7 +167,7 @@ class ProfessionalSocietiesSource(BaseSource):
                     a = self._abs(imgs[1].get("src", ""), base)
                     if b and a:
                         pairs.append(
-                            self._make_pair(b, a, page_url, "figure_caption")
+                            self._make_pair(b, a, page_url, "figure_caption", soup)
                         )
 
         # Method 3: alt-text labelled images
@@ -135,7 +184,7 @@ class ProfessionalSocietiesSource(BaseSource):
                 elif AFTER_RE.search(alt):
                     after_urls.append(src)
             for b, a in zip(before_urls, after_urls):
-                pairs.append(self._make_pair(b, a, page_url, "alt_text"))
+                pairs.append(self._make_pair(b, a, page_url, "alt_text", soup))
 
         return pairs
 
@@ -187,9 +236,37 @@ class ProfessionalSocietiesSource(BaseSource):
             return url
         return urljoin(base, url)
 
+    def _extract_treatment(self, page_url: str, soup: BeautifulSoup) -> str | None:
+        """Extract treatment category from URL path segments, then page title/h1."""
+        path_parts = urlparse(page_url).path.strip("/").split("/")
+        for part in path_parts:
+            if part in PROCEDURE_SLUG_MAP:
+                return PROCEDURE_SLUG_MAP[part]
+
+        # Scan title and h1 for procedure keyword matches
+        for tag in ("title", "h1"):
+            el = soup.find(tag)
+            if not el:
+                continue
+            text = el.get_text().lower()
+            for slug, treatment in PROCEDURE_SLUG_MAP.items():
+                if slug.replace("-", " ") in text:
+                    return treatment
+
+        return None
+
     def _make_pair(
-        self, before_url: str, after_url: str, source_url: str, method: str
+        self,
+        before_url: str,
+        after_url: str,
+        source_url: str,
+        method: str,
+        soup: BeautifulSoup | None = None,
     ) -> RawImagePair:
+        treatment = self._extract_treatment(source_url, soup) if soup else None
+        metadata: dict = {"extraction_method": method}
+        if treatment:
+            metadata["treatment_category"] = treatment
         return RawImagePair(
             before_url=before_url,
             after_url=after_url,
@@ -197,5 +274,5 @@ class ProfessionalSocietiesSource(BaseSource):
             source_name=self.config.name,
             language=self.config.language,
             consent_tier=ConsentTier(self.config.consent_tier),
-            metadata={"extraction_method": method},
+            metadata=metadata,
         )
