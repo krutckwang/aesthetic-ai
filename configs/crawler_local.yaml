@@ -142,16 +142,7 @@ sources:
       - "https://www.smartbeautyguide.com/before-and-after/brow-lift"
       - "https://www.smartbeautyguide.com/before-and-after/eyelid-surgery"
       - "https://www.smartbeautyguide.com/before-and-after/kybella"
-      # ── DocShop — dedicated before/after database, treatment in URL ──
-      - "https://www.docshop.com/education/cosmetic/face/botox/photos"
-      - "https://www.docshop.com/education/cosmetic/face/dermal-fillers/photos"
-      - "https://www.docshop.com/education/cosmetic/face/lip-augmentation/photos"
-      - "https://www.docshop.com/education/cosmetic/face/rhinoplasty/photos"
-      - "https://www.docshop.com/education/cosmetic/face/facelift/photos"
-      - "https://www.docshop.com/education/cosmetic/face/brow-lift/photos"
-      - "https://www.docshop.com/education/cosmetic/face/eyelid-surgery/photos"
-      # ── AAFPRS public site ──
-      - "https://www.facialplasticsurgery.net/before-after-photos"
+      # NOTE: docshop.com and facialplasticsurgery.net are JS-rendered/unreachable — removed
 
   beauty_media:
     enabled: true
