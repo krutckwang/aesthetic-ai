@@ -57,6 +57,11 @@ class LoRALinear(nn.Module):
         nn.init.kaiming_uniform_(self.lora_A.weight, a=math.sqrt(5))
         nn.init.zeros_(self.lora_B.weight)
 
+        device = linear.weight.device
+        dtype = linear.weight.dtype
+        self.lora_A = self.lora_A.to(device=device, dtype=dtype)
+        self.lora_B = self.lora_B.to(device=device, dtype=dtype)
+
         for p in self.base.parameters():
             p.requires_grad = False
 
