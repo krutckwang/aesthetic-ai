@@ -65,6 +65,11 @@ PROCEDURE_SLUG_MAP: dict[str, str] = {
     "prp": "prp",
     "platelet-rich-plasma": "prp",
     "thread-lift": "thread_lift",
+    "microdermabrasion": "microdermabrasion",
+    "ipl-photofacial": "ipl_photofacial",
+    "ipl": "ipl_photofacial",
+    "fat-transfer-to-face": "fat_transfer",
+    "fat-transfer": "fat_transfer",
     # Injectable brand names (DocShop, SmartBeautyGuide, RealSelf use these as URL slugs)
     "juvederm": "dermal_filler",
     "restylane": "dermal_filler",

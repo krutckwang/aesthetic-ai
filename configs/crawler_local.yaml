@@ -142,14 +142,32 @@ sources:
       - "https://www.baaps.org.uk/patients/procedures/necklift"
       # NOTE: plasticsurgery.org and aad.org are JS-rendered — skip locally
       # ── SmartBeautyGuide (ASAPS patient portal) — treatment in URL ──
+      # Injectables
       - "https://www.smartbeautyguide.com/before-and-after/botox"
       - "https://www.smartbeautyguide.com/before-and-after/lip-augmentation"
       - "https://www.smartbeautyguide.com/before-and-after/dermal-fillers"
+      - "https://www.smartbeautyguide.com/before-and-after/kybella"
+      - "https://www.smartbeautyguide.com/before-and-after/juvederm"
+      - "https://www.smartbeautyguide.com/before-and-after/restylane"
+      - "https://www.smartbeautyguide.com/before-and-after/sculptra"
+      - "https://www.smartbeautyguide.com/before-and-after/radiesse"
+      - "https://www.smartbeautyguide.com/before-and-after/cheek-augmentation"
+      - "https://www.smartbeautyguide.com/before-and-after/chin-augmentation"
+      # Surgical — face
       - "https://www.smartbeautyguide.com/before-and-after/rhinoplasty"
       - "https://www.smartbeautyguide.com/before-and-after/facelift"
       - "https://www.smartbeautyguide.com/before-and-after/brow-lift"
       - "https://www.smartbeautyguide.com/before-and-after/eyelid-surgery"
-      - "https://www.smartbeautyguide.com/before-and-after/kybella"
+      - "https://www.smartbeautyguide.com/before-and-after/neck-lift"
+      - "https://www.smartbeautyguide.com/before-and-after/otoplasty"
+      - "https://www.smartbeautyguide.com/before-and-after/fat-transfer-to-face"
+      # Skin treatments
+      - "https://www.smartbeautyguide.com/before-and-after/laser-skin-resurfacing"
+      - "https://www.smartbeautyguide.com/before-and-after/chemical-peel"
+      - "https://www.smartbeautyguide.com/before-and-after/microneedling"
+      - "https://www.smartbeautyguide.com/before-and-after/thread-lift"
+      - "https://www.smartbeautyguide.com/before-and-after/microdermabrasion"
+      - "https://www.smartbeautyguide.com/before-and-after/ipl-photofacial"
       # NOTE: docshop.com and facialplasticsurgery.net are JS-rendered/unreachable — removed
 
   beauty_media:
