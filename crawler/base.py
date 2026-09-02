@@ -245,12 +245,35 @@ class BaseSource(ABC):
         ssl_verify = os.getenv("CRAWLER_SSL_VERIFY", "1") != "0"
         try:
             with sync_playwright() as pw:
-                browser = pw.chromium.launch(headless=True)
+                browser = pw.chromium.launch(
+                    headless=True,
+                    args=[
+                        "--no-sandbox",
+                        "--disable-setuid-sandbox",
+                        "--disable-blink-features=AutomationControlled",
+                    ],
+                )
                 context = browser.new_context(
-                    # Don't override UA — let Playwright use Chrome's real UA
-                    extra_http_headers={"Accept-Language": "en-US,en;q=0.9"},
+                    user_agent=(
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/120.0.0.0 Safari/537.36"
+                    ),
+                    viewport={"width": 1920, "height": 1080},
+                    locale="en-US",
+                    timezone_id="America/New_York",
+                    extra_http_headers={
+                        "Accept-Language": "en-US,en;q=0.9",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    },
                     ignore_https_errors=not ssl_verify,
                 )
+                context.add_init_script("""
+                    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+                    window.chrome = { runtime: {} };
+                    Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4] });
+                    Object.defineProperty(navigator, 'languages', { get: () => ['en-US','en'] });
+                """)
                 page = context.new_page()
                 page.goto(url, wait_until="networkidle", timeout=30_000)
                 html = page.content()

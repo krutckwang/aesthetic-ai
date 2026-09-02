@@ -14,19 +14,16 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-OLD_DB  = Path("data/queue.db")        # downloaded from Kaggle
-NEW_DB  = Path("data/staging.db")      # produced by local crawler
-OUT_DB  = Path("data/merged_queue.db") # upload this to Kaggle
+OLD_DB      = Path("data/queue.db")            # downloaded from Kaggle
+NEW_DB      = Path("data/staging.db")          # produced by local crawler
+REALSELF_DB = Path("data/realself_pairs.db")   # downloaded from Colab
+OUT_DB      = Path("data/merged_queue.db")     # upload this to Kaggle
 
 def main():
     if not OLD_DB.exists():
         print(f"ERROR: {OLD_DB} not found.")
         print("Download your Kaggle queue.db to data/queue.db first:")
         print("  Go to kaggle.com → Datasets → aesthetic-pairs-queue → Download")
-        return
-
-    if not NEW_DB.exists():
-        print(f"ERROR: {NEW_DB} not found — run the local crawler first.")
         return
 
     # Start from a copy of the old DB so we keep all original pairs
@@ -40,20 +37,36 @@ def main():
     before = conn.execute("SELECT COUNT(*) FROM staging_queue").fetchone()[0]
     print(f"Old queue: {before} pairs")
 
-    # Attach and merge new pairs (INSERT OR IGNORE respects the UNIQUE constraint)
-    conn.execute(f"ATTACH DATABASE '{NEW_DB}' AS new_db")
-    conn.execute("""
-        INSERT OR IGNORE INTO main.staging_queue
-            (before_url, after_url, source_url, source_name,
-             language, consent_tier, metadata, status, created_at)
-        SELECT
-            before_url, after_url, source_url, source_name,
-            language, consent_tier, metadata, 'pending',
-            COALESCE(created_at, ?)
-        FROM new_db.staging_queue
-        WHERE status = 'pending'
-    """, (datetime.utcnow().isoformat(),))
-    conn.commit()
+    def merge_db(path: Path, label: str) -> int:
+        if not path.exists():
+            print(f"Skipping {label} ({path} not found)")
+            return 0
+        conn.execute(f"ATTACH DATABASE '{path}' AS extra_{label}")
+        conn.execute(f"""
+            INSERT OR IGNORE INTO main.staging_queue
+                (before_url, after_url, source_url, source_name,
+                 language, consent_tier, metadata, status, created_at)
+            SELECT
+                before_url, after_url, source_url,
+                COALESCE(source_name, '{label}'),
+                COALESCE(language, 'en'),
+                COALESCE(consent_tier, 2),
+                metadata, 'pending',
+                COALESCE(created_at, ?)
+            FROM extra_{label}.staging_queue
+            WHERE status = 'pending'
+        """, (datetime.utcnow().isoformat(),))
+        conn.execute(f"DETACH DATABASE extra_{label}")
+        conn.commit()
+        after_merge = conn.execute("SELECT COUNT(*) FROM staging_queue").fetchone()[0]
+        added = after_merge - before
+        print(f"  + {label}: {added} new pairs")
+        return added
+
+    # Merge local crawler output
+    merge_db(NEW_DB, "local")
+    # Merge RealSelf Colab output (if present)
+    merge_db(REALSELF_DB, "realself")
 
     # Count after
     after = conn.execute("SELECT COUNT(*) FROM staging_queue").fetchone()[0]

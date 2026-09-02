@@ -115,10 +115,17 @@ sources:
     language: en
     consent_tier: 2
     platforms:
-      - name: healthgrades
-        base_url: "https://www.healthgrades.com"
       - name: ratemds
         base_url: "https://www.ratemds.com"
+      # RealPatientRatings — before/after section per procedure
+      - name: realpatientratings_botox
+        base_url: "https://www.realpatientratings.com/before-and-after/botox"
+      - name: realpatientratings_fillers
+        base_url: "https://www.realpatientratings.com/before-and-after/dermal-fillers"
+      - name: realpatientratings_rhinoplasty
+        base_url: "https://www.realpatientratings.com/before-and-after/rhinoplasty"
+      - name: realpatientratings_facelift
+        base_url: "https://www.realpatientratings.com/before-and-after/facelift"
 
   professional_societies:
     enabled: true
@@ -187,9 +194,17 @@ sources:
     rate_limit_seconds: 4.0
     language: ko
     consent_tier: 2
+    respect_robots_txt: false            # Naver search blocks bots via robots.txt
     base_urls:
-      - "https://blog.naver.com"
-      - "https://cafe.naver.com"
+      # Naver blog search — Korean aesthetic clinic posts
+      - "https://search.naver.com/search.naver?where=blog&query=%EB%B3%B4%ED%86%A1%EC%8A%A4+%EC%8B%9C%EC%88%A0+%EC%A0%84%ED%9B%84"
+      - "https://search.naver.com/search.naver?where=blog&query=%ED%95%84%EB%9F%AC+%EC%8B%9C%EC%88%A0+%EC%A0%84%ED%9B%84"
+      - "https://search.naver.com/search.naver?where=blog&query=%EC%9E%85%EC%88%A0+%ED%95%84%EB%9F%AC+%EC%A0%84%ED%9B%84"
+      - "https://search.naver.com/search.naver?where=blog&query=%EC%BD%94+%EC%84%B1%ED%98%95+%EC%A0%84%ED%9B%84+%EC%82%AC%EC%A7%84"
+      # Gangnam aesthetic community — structured before/after sections
+      - "https://www.gangnamunni.com/review/list?treatType=필러"
+      - "https://www.gangnamunni.com/review/list?treatType=보톡스"
+      - "https://www.gangnamunni.com/review/list?treatType=코성형"
 
   brazilian_sources:
     enabled: true
