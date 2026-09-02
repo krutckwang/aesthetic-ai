@@ -66,14 +66,26 @@ print(f"No match found:   {no_match}")
 print(f"Label coverage:   {labeled_total}/{total} ({100*labeled_total//max(total,1)}%)")
 
 if no_match:
-    # Show sample unmatched URLs so we can improve SLUG_MAP if needed
+    # Show sample unmatched URLs
     unmatched = conn.execute("""
         SELECT source_name, source_url FROM staging_queue
         WHERE (metadata IS NULL OR metadata NOT LIKE '%treatment_category%')
-        LIMIT 20
+        LIMIT 10
     """).fetchall()
     print(f"\nSample unmatched source URLs:")
     for name, url in unmatched:
         print(f"  [{name}] {url}")
+
+    # Delete non-facial/body procedure pairs — all remaining unlabeled rows
+    # from plasticsurgery.org are body procedures (arm-lift, body-contouring, etc.)
+    # that have no value for a facial aesthetic model.
+    deleted = conn.execute("""
+        DELETE FROM staging_queue
+        WHERE (metadata IS NULL OR metadata NOT LIKE '%treatment_category%')
+    """).rowcount
+    conn.commit()
+    print(f"\nDeleted {deleted} unlabeled (non-facial) rows.")
+    remaining = conn.execute("SELECT COUNT(*) FROM staging_queue").fetchone()[0]
+    print(f"Remaining rows:   {remaining} (all labeled)")
 
 conn.close()
