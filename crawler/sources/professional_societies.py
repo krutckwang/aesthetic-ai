@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from loguru import logger
 
 from crawler.base import BaseSource, ConsentTier, RawImagePair
+from crawler.treatment_labels import SLUG_MAP as PROCEDURE_SLUG_MAP
 
 
 IMAGE_EXT_RE = re.compile(r"\.(jpe?g|png|webp|gif)(\?.*)?$", re.IGNORECASE)
@@ -18,8 +19,9 @@ AFTER_RE = re.compile(
     r"\bafter\b|\bpost[- ]?op\b|\bresult\b|\boutcome\b|\bpost-treatment\b", re.I
 )
 
-# Maps URL path slugs → canonical treatment category
-PROCEDURE_SLUG_MAP: dict[str, str] = {
+# PROCEDURE_SLUG_MAP is now imported from crawler.treatment_labels as SLUG_MAP.
+# Kept as an alias so existing references in this file continue to work.
+_LEGACY_SLUG_MAP: dict[str, str] = {
     # Injectables
     "botulinum-toxin": "botox",
     "botox": "botox",
@@ -93,6 +95,8 @@ PROCEDURE_SLUG_MAP: dict[str, str] = {
     "upper-blepharoplasty": "blepharoplasty",
     "lower-blepharoplasty": "blepharoplasty",
 }
+# Merge legacy entries into the shared map so nothing is lost
+PROCEDURE_SLUG_MAP.update(_LEGACY_SLUG_MAP)
 
 # Per-society CSS selector configs for before/after containers
 SOCIETY_SELECTORS: dict[str, dict] = {

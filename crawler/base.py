@@ -15,6 +15,8 @@ import httpx
 import yaml
 from loguru import logger
 
+from crawler.treatment_labels import extract_treatment_from_url
+
 
 class RenderingMethod(str, Enum):
     STATIC = "static"
@@ -131,7 +133,12 @@ class BaseSource(ABC):
 
             pairs = self.extract_pairs_from_page(html, page_url)
             logger.debug(f"[{self.config.name}] {page_url} → {len(pairs)} candidate pairs")
-            yield from pairs
+            for pair in pairs:
+                if not pair.metadata.get("treatment_category"):
+                    t = extract_treatment_from_url(pair.source_url)
+                    if t:
+                        pair.metadata["treatment_category"] = t
+                yield pair
 
             # Drain any secondary pages queued during extraction
             secondary = self._pop_queued_pages()
