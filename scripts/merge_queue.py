@@ -41,6 +41,7 @@ def main():
         if not path.exists():
             print(f"Skipping {label} ({path} not found)")
             return 0
+        count_before = conn.execute("SELECT COUNT(*) FROM staging_queue").fetchone()[0]
         conn.execute(f"ATTACH DATABASE '{path}' AS extra_{label}")
         conn.execute(f"""
             INSERT OR IGNORE INTO main.staging_queue
@@ -56,10 +57,10 @@ def main():
             FROM extra_{label}.staging_queue
             WHERE status = 'pending'
         """, (datetime.utcnow().isoformat(),))
+        conn.commit()                                          # commit BEFORE detach
         conn.execute(f"DETACH DATABASE extra_{label}")
-        conn.commit()
-        after_merge = conn.execute("SELECT COUNT(*) FROM staging_queue").fetchone()[0]
-        added = after_merge - before
+        count_after = conn.execute("SELECT COUNT(*) FROM staging_queue").fetchone()[0]
+        added = count_after - count_before
         print(f"  + {label}: {added} new pairs")
         return added
 
