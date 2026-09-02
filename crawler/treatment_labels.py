@@ -102,22 +102,37 @@ def extract_treatment_from_url(url: str) -> str | None:
 
     Checks (in order):
     1. Reddit subreddit name  (/r/<sub>)
-    2. URL path segments matched against SLUG_MAP
+    2. Exact URL path segment match against SLUG_MAP
+    3. Word-boundary slug match within any path segment
+       (handles compound slugs like "botox-forehead-lines-12345")
+    4. Slug match anywhere in the full URL path string
     """
     url_lower = url.lower()
 
-    # Reddit subreddit
+    # 1. Reddit subreddit
     m = re.search(r"/r/([^/?#]+)", url_lower)
     if m:
         sub = m.group(1)
         if sub in SUBREDDIT_MAP:
             return SUBREDDIT_MAP[sub]
 
-    # Path segments
     path = urlparse(url_lower).path
+
+    # 2. Exact segment match
     for part in path.strip("/").split("/"):
         part = part.split("?")[0]
         if part in SLUG_MAP:
             return SLUG_MAP[part]
+
+    # 3. Word-boundary match within path (longer slugs checked first to prefer specific)
+    for slug, treatment in sorted(SLUG_MAP.items(), key=lambda x: -len(x[0])):
+        pattern = rf"(?:^|[/_-]){re.escape(slug)}(?:[/_-]|$)"
+        if re.search(pattern, path):
+            return treatment
+
+    # 4. Simple substring match on full path (last resort, longer slugs first)
+    for slug, treatment in sorted(SLUG_MAP.items(), key=lambda x: -len(x[0])):
+        if slug in path:
+            return treatment
 
     return None

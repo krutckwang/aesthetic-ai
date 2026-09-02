@@ -56,7 +56,6 @@ for row_id, source_url, metadata_str in rows:
     updated += 1
 
 conn.commit()
-conn.close()
 
 total = len(rows)
 labeled_total = already_labeled + updated
@@ -65,7 +64,16 @@ print(f"Already labeled:  {already_labeled}")
 print(f"Newly labeled:    {updated}")
 print(f"No match found:   {no_match}")
 print(f"Label coverage:   {labeled_total}/{total} ({100*labeled_total//max(total,1)}%)")
+
 if no_match:
-    print(f"\n{no_match} rows have no match in SLUG_MAP.")
-    print("Their source URLs don't contain a known procedure slug.")
-    print("These will still be used in training — Cell 4 will mark them as unlabeled.")
+    # Show sample unmatched URLs so we can improve SLUG_MAP if needed
+    unmatched = conn.execute("""
+        SELECT source_name, source_url FROM staging_queue
+        WHERE (metadata IS NULL OR metadata NOT LIKE '%treatment_category%')
+        LIMIT 20
+    """).fetchall()
+    print(f"\nSample unmatched source URLs:")
+    for name, url in unmatched:
+        print(f"  [{name}] {url}")
+
+conn.close()
