@@ -118,7 +118,8 @@ class BaseSource(ABC):
                 continue
             self._visited_urls.add(page_url)
 
-            if not self._is_allowed_by_robots(page_url):
+            if self.config.extra.get("respect_robots_txt", True) and \
+                    not self._is_allowed_by_robots(page_url):
                 logger.warning(f"[{self.config.name}] robots.txt disallows: {page_url}")
                 continue
 

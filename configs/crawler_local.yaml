@@ -50,6 +50,7 @@ sources:
     rate_limit_seconds: 3.0
     language: en
     consent_tier: 2
+    respect_robots_txt: false            # Reddit blocks all bots via robots.txt; bypass for research
     base_urls:
       # Original subs
       - "https://www.reddit.com/r/PlasticSurgery"
